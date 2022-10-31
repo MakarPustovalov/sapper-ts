@@ -14,6 +14,7 @@ interface TileProps {
   mined: boolean;
   onClick: (id: string, mined: boolean) => void;
   locked: boolean;
+  bombCount: number;
 }
 
 const Tile: FC<TileProps> = ({
@@ -22,6 +23,7 @@ const Tile: FC<TileProps> = ({
   mined,
   onClick,
   locked,
+  bombCount,
 }) => {
   const [tileState, setTileState] = useState(state ?? TileState.normal);
 
@@ -48,7 +50,9 @@ const Tile: FC<TileProps> = ({
       })}
       onClick={() => clickHandler(id, mined)}
       onContextMenu={rightClickHandler}
-    ></div>
+    >
+      {tileState === TileState.revealed && bombCount}
+    </div>
   );
 };
 

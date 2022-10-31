@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import style from "./Field.module.sass";
 import { FC } from "react";
 import Tile, { TileState } from "../Tile/Tile";
+import getPlainList from "../../utils/getPlainList";
 
 interface FieldProps {
   rows: number;
@@ -15,6 +16,7 @@ interface TileObj {
   id: string;
   revealed: boolean;
   mined: boolean;
+  bombCount: number;
 }
 
 const Field: FC<FieldProps> = ({
@@ -55,31 +57,57 @@ const Field: FC<FieldProps> = ({
       let columnsArr: Array<TileObj> = [];
       for (let j = 0; j < columns; j++) {
         let id = `${i}${j}`;
-        columnsArr.push({ id, revealed: false, mined: bombIds.includes(id) });
+        columnsArr.push({
+          id,
+          revealed: false,
+          mined: bombIds.includes(id),
+          bombCount: 0,
+        });
       }
       rowsArr.push(columnsArr);
     }
     setRowsList(rowsArr);
   };
 
-  const getPlainList = (rowsList: Array<Array<TileObj>>): Array<TileObj> =>
-    rowsList.length > 0
-      ? rowsList.reduce((prev = [], curr) => prev.concat(curr))
-      : [];
-
   const checkIsAllRevealed = (list: Array<TileObj>) =>
     list.length > 0 &&
     list.filter((el) => !el.mined && !el.revealed).length < 1;
 
-  const updateTilesList = (
+  const getTileById = (
+    id: string,
+    list: Array<Array<TileObj>>
+  ): TileObj | null => getPlainList(list).find((el) => el.id === id);
+
+  const getAdjacentBombsNumber = (
     id: string,
     rowsList: Array<Array<TileObj>>
+  ): number => {
+    let res: number = 0;
+    let row = Number(id[0]);
+    let col = Number(id[1]);
+
+    if (getTileById(`${row - 1}${col - 1}`, rowsList)?.mined) res++;
+    if (getTileById(`${row - 1}${col}`, rowsList)?.mined) res++;
+    if (getTileById(`${row - 1}${col + 1}`, rowsList)?.mined) res++;
+    if (getTileById(`${row}${col - 1}`, rowsList)?.mined) res++;
+    if (getTileById(`${row}${col + 1}`, rowsList)?.mined) res++;
+    if (getTileById(`${row + 1}${col - 1}`, rowsList)?.mined) res++;
+    if (getTileById(`${row + 1}${col}`, rowsList)?.mined) res++;
+    if (getTileById(`${row + 1}${col + 1}`, rowsList)?.mined) res++;
+
+    return res;
+  };
+
+  const updateTilesList = (
+    id: string,
+    rowsList: Array<Array<TileObj>>,
+    bombCount: number
   ): void => {
     let rowIndex = Number(id[0]);
     let colIndex = Number(id[1]);
     let row = rowsList[rowIndex];
     let col = row[colIndex];
-    let newTile = { ...col, revealed: true };
+    let newTile = { ...col, revealed: true, bombCount };
     let newRow = [];
     let newArr = [];
 
@@ -106,7 +134,9 @@ const Field: FC<FieldProps> = ({
   const tileClickHandler = (id: string, mined: boolean): void => {
     if (locked) return;
     if (mined) onLose();
-    else updateTilesList(id, rowsList);
+    else {
+      updateTilesList(id, rowsList, getAdjacentBombsNumber(id, rowsList));
+    }
   };
 
   return (
@@ -116,13 +146,14 @@ const Field: FC<FieldProps> = ({
           className={style.fieldRow}
           key={el[0].id + "-" + el[el.length - 1].id}
         >
-          {el.map(({ id, mined, revealed }) => (
+          {el.map(({ id, mined, revealed, bombCount }) => (
             <Tile
               key={id}
               id={id}
               mined={mined}
               onClick={tileClickHandler}
               state={revealed ? TileState.revealed : undefined}
+              bombCount={bombCount}
               locked={locked}
             />
           ))}

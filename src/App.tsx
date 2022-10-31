@@ -10,8 +10,8 @@ enum GameState {
 
 function App() {
   const [bombs, setBombs] = useState(10);
-  const [rows, setRows] = useState(5);
-  const [columns, setColumns] = useState(5);
+  const [rows, setRows] = useState(10);
+  const [columns, setColumns] = useState(10);
   const [gameId, setGameId] = useState(0);
   const [gameState, setGameState] = useState<GameState>(GameState.normal);
 
