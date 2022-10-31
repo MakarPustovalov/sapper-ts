@@ -28,18 +28,29 @@ const Field: FC<FieldProps> = ({
   locked,
 }) => {
   const [rowsList, setRowsList] = useState<Array<Array<TileObj>>>([]);
+  /*
+   *  [[{
+   *   id: string;
+   *   revealed: boolean;
+   *   mined: boolean;
+   *   bombCount: number;
+   *  }]]
+   */
+
+  // __________
+  // UTILS
+  // __________
+
+  const generateRandomId = (arr: string[]): string => {
+    let a = Math.floor(Math.random() * (rows - 1));
+    let b = Math.floor(Math.random() * (columns - 1));
+    let id = `${a}${b}`;
+    if (arr.includes(id)) return generateRandomId(arr);
+    else return id;
+  };
 
   const generateBombs = (bombs: number): string[] => {
     const arr: string[] = [];
-
-    const generateRandomId = (arr: string[]): string => {
-      let a = Math.floor(Math.random() * (rows - 1));
-      let b = Math.floor(Math.random() * (columns - 1));
-      let id = `${a}${b}`;
-      if (arr.includes(id)) return generateRandomId(arr);
-      else return id;
-    };
-
     for (let i = 0; i < bombs; i++) {
       let id = generateRandomId(arr);
       arr.push(id);
@@ -54,8 +65,10 @@ const Field: FC<FieldProps> = ({
   ): void => {
     let rowsArr: Array<Array<TileObj>> = [];
     for (let i = 0; i < rows; i++) {
+      // generate rows
       let columnsArr: Array<TileObj> = [];
       for (let j = 0; j < columns; j++) {
+        // generate columns (tiles)
         let id = `${i}${j}`;
         columnsArr.push({
           id,
@@ -68,10 +81,6 @@ const Field: FC<FieldProps> = ({
     }
     setRowsList(rowsArr);
   };
-
-  const checkIsAllRevealed = (list: Array<TileObj>) =>
-    list.length > 0 &&
-    list.filter((el) => !el.mined && !el.revealed).length < 1;
 
   const getTileById = (
     id: string,
@@ -123,6 +132,14 @@ const Field: FC<FieldProps> = ({
     setRowsList(newArr);
   };
 
+  const checkIsAllRevealed = (list: Array<TileObj>) =>
+    list.length > 0 &&
+    list.filter((el) => !el.mined && !el.revealed).length < 1;
+
+  // __________
+  // EFFECTS
+  // __________
+
   useEffect(() => {
     generateTiles(rows, columns, generateBombs(bombs));
   }, [bombs]);
@@ -130,6 +147,10 @@ const Field: FC<FieldProps> = ({
   useEffect(() => {
     if (checkIsAllRevealed(getPlainList(rowsList))) onWin();
   }, [rowsList]);
+
+  // __________
+  // HANDLERS
+  // __________
 
   const tileClickHandler = (id: string, mined: boolean): void => {
     if (locked) return;

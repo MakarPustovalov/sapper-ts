@@ -27,12 +27,14 @@ const Tile: FC<TileProps> = ({
 }) => {
   const [tileState, setTileState] = useState(state ?? TileState.normal);
 
+  // Revealing handler
   const clickHandler = (id: string, mined: boolean): void => {
     if (tileState === TileState.revealed || locked) return;
     setTileState(TileState.revealed);
     onClick(id, mined);
   };
 
+  // Flagging handler
   const rightClickHandler = (e: MouseEvent<HTMLDivElement>): void => {
     e.preventDefault();
     if (tileState === TileState.revealed || locked) return;
@@ -51,7 +53,7 @@ const Tile: FC<TileProps> = ({
       onClick={() => clickHandler(id, mined)}
       onContextMenu={rightClickHandler}
     >
-      {tileState === TileState.revealed && bombCount}
+      {tileState === TileState.revealed && bombCount > 0 && bombCount}
     </div>
   );
 };

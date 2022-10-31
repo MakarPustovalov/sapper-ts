@@ -20,10 +20,6 @@ function App() {
     setGameState(GameState.normal);
   };
 
-  const updateGameState = (state: GameState): void => {
-    setGameState(state);
-  };
-
   return (
     <div className="App">
       <Field
@@ -31,8 +27,8 @@ function App() {
         bombs={bombs}
         rows={rows}
         columns={columns}
-        onWin={() => updateGameState(GameState.won)}
-        onLose={() => updateGameState(GameState.lost)}
+        onWin={() => setGameState(GameState.won)}
+        onLose={() => setGameState(GameState.lost)}
         locked={gameState === GameState.won || gameState === GameState.lost}
       />
       {gameState !== GameState.normal && (
